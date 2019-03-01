@@ -32,7 +32,8 @@
 
 # Icons used for printing
 CROSS='✝'
-
+BQUOTE='❝'
+EQUOTE='❞'
 # Use colors, but only if connected to a terminal, and that terminal
 # supports them.
 if which tput >/dev/null 2>&1; then
@@ -47,14 +48,14 @@ if [ -t 1 ] && [ -n "$ncolors" ] && [ "$ncolors" -ge 8 ]; then
   NC="$(tput sgr0)"
 else
   RED='\033[0;31m'
-  BLUE='\033[0;34m'
-  BBLUE='\033[1;34m'
   GREEN='\033[0;32m'
   YELLOW='\033[0;33m'
-  CYAN='\033[0;36m'
+  BLUE='\033[0;34m'
+  BOLD="\033[1m"
   NC='\033[0m'
 fi
-
+# Maximum column width
+width=$((70))
 # RSS feed URL for BG
 # Source base for this script: https://github.com/mztriz/votd
 # 9 is KJV - https://www.biblegateway.com/usage/linking/versionslist/
@@ -67,12 +68,54 @@ case "$VOTD_ID" in
     ;;
 esac
 # Grab VOTD from XML in URL
-MESSAGE=$(curl --silent --connect-timeout 10 "$VOTD_URL" | grep -o '&ldquo.*' | cut -f2- -d';' | cut -d '&' -f1)
-VERSE=$(curl --silent --connect-timeout 10 "$VOTD_URL" | sed -n '22 p'| sed -e 's/<[^>]*>//g')
+get_votd () {
+  curl --silent --connect-timeout 10 "$VOTD_URL"
+}
+
+TITLE=$(
+  get_votd |
+  grep '<title>' |
+  sed -n 1p |
+  sed -e 's/<[^>]*>//g' |
+  sed 's/^[ \t]*//' 
+)
+
+DESCRIPTION=$(
+  get_votd |
+  grep '<description>' |
+  sed -n 1p |
+  sed -e 's/<[^>]*>//g' |
+  sed 's/^[ \t]*//' 
+)
+
+MESSAGE=$(
+  get_votd |
+  grep -o '&ldquo.*' |
+  cut -f2- -d';' |
+  cut -d '&' -f1 |
+  sed -e 's/^[[:space:]]*//' |
+  fold -w ${width} -s
+)
+
+VERSE=$(
+  get_votd |
+  grep '<title>' |
+  sed -n 2p |
+  sed -e 's/<[^>]*>//g' | 
+  xargs echo -n
+)
+
+RIGHTS=$(
+  get_votd |
+  grep '<dc:rights>' |
+  sed -n 2p |
+  sed -e 's/<[^>]*>//g'
+)
 
 header () {
   clear
-  echo -e "${BLUE}Verse of the Day${NC} ${CROSS}"
+  echo -e "${BLUE}${BOLD}${TITLE}${NC} ${CROSS}"
+  echo -e "${DESCRIPTION}"
   echo -e "${GREEN}"
   echo '  _    ______  __________  '
   echo ' | |  / / __ \/_  __/ __ \ '
@@ -80,7 +123,8 @@ header () {
   echo ' | |/ / /_/ / / / / /_/ /  '
   echo ' |___/\____/ /_/ /_____/   '
   echo -e "${NC}"
-  echo -e " \"${BLUE}${MESSAGE}${NC}\"${GREEN}${VERSE}${NC} ${YELLOW}(${VOTD_VERSION})${NC}\n"
+  echo -e "${BQUOTE}${BLUE}${MESSAGE}${NC}${EQUOTE} ${GREEN}${VERSE}${NC} ${YELLOW}(${VOTD_VERSION})${NC}\n"
+  echo -e "${RIGHTS}"
 }
 
 votd() {
