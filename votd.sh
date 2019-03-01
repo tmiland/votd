@@ -45,6 +45,7 @@ if [ -t 1 ] && [ -n "$ncolors" ] && [ "$ncolors" -ge 8 ]; then
   YELLOW="$(tput setaf 3)"
   BLUE="$(tput setaf 4)"
   BOLD="$(tput bold)"
+  DIM="$(tput dim)"
   NC="$(tput sgr0)"
 else
   RED='\033[0;31m'
@@ -52,6 +53,7 @@ else
   YELLOW='\033[0;33m'
   BLUE='\033[0;34m'
   BOLD="\033[1m"
+  DIM="\033[2m"
   NC='\033[0m'
 fi
 # Maximum column width
@@ -115,7 +117,7 @@ RIGHTS=$(
 header () {
   clear
   echo -e "${BLUE}${BOLD}${TITLE}${NC} ${CROSS}"
-  echo -e "${DESCRIPTION}"
+  echo -e "${DIM}${DESCRIPTION}${NC}"
   echo -e "${GREEN}"
   echo '  _    ______  __________  '
   echo ' | |  / / __ \/_  __/ __ \ '
