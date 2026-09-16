@@ -1,4 +1,6 @@
 # Verse of the Day
+[![Sponsor @tmiland](https://img.shields.io/badge/Sponsor-%40tmiland-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/tmiland)
+
 A small bash script to print Bible Gateway's Verse of the Day in KJV
 
 ## Installation
